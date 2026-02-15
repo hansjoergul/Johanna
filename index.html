@@ -4,22 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2c3e50">
     <title>Johanna</title>
     
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
 
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&family=Nunito:wght@800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --primary: #ff6b81;
-            --primary-glow: #ff8fa3;
-            --bg-overlay: rgba(60, 20, 40, 0.6); /* Dunkleres Overlay für Lesbarkeit */
+            --primary: #ff8fa3;       /* Sanftes Pink */
+            --accent: #a29bfe;        /* Lila Akzent */
             --glass: rgba(255, 255, 255, 0.15);
-            --glass-border: rgba(255, 255, 255, 0.3);
-            --text-glow: 0 0 10px rgba(255, 107, 129, 0.8);
+            --glass-solid: rgba(25, 25, 35, 0.6); 
+            --text: #ffffff;
+            --overlay: rgba(0, 0, 0, 0.4); /* Dunkleres Overlay für bessere Lesbarkeit */
         }
 
         * {
@@ -27,21 +27,27 @@
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
+            font-family: 'Quicksand', sans-serif;
+            user-select: none;
         }
 
         body {
-            font-family: 'Fredoka', sans-serif;
-            background: linear-gradient(135deg, var(--bg-overlay), var(--bg-overlay)), url('bild.jpg');
+            /* Fallback Farbe + Bild */
+            background-color: #2c3e50;
+            background-image: linear-gradient(var(--overlay), var(--overlay)), url('bild.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            color: white;
+            color: var(--text);
             height: 100vh;
+            width: 100vw;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
         }
 
-        /* --- Hintergrund Animation --- */
-        .hearts {
+        /* --- BACKGROUND ANIMATION --- */
+        .hearts-bg {
             position: fixed;
             top: 0;
             left: 0;
@@ -49,368 +55,393 @@
             height: 100%;
             pointer-events: none;
             z-index: 0;
+            overflow: hidden;
         }
-        
-        .heart-particle {
+        .heart {
             position: absolute;
-            color: rgba(255, 192, 203, 0.4);
-            animation: float 6s infinite linear;
-            bottom: -20px;
+            color: rgba(255, 192, 203, 0.3);
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
         }
 
-        @keyframes float {
-            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-            20% { opacity: 0.8; }
-            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
-        }
-
-        /* --- Screens --- */
-        #pin-screen, #app-screen {
+        /* --- SCREENS --- */
+        .screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            transition: opacity 0.4s;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         .hidden {
             opacity: 0;
             pointer-events: none;
-            z-index: -10;
+            transform: scale(1.1);
         }
 
-        /* --- PIN Screen Style --- */
+        /* --- 1. PIN SCREEN (iOS Style) --- */
         #pin-screen {
-            display: flex;
-            justify-content: center;
-            align-items: center;
             z-index: 100;
-            backdrop-filter: blur(10px);
-            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(0,0,0,0.4);
+            align-items: center;
+            justify-content: center;
         }
 
-        .pin-box {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 30px;
-            border-radius: 25px;
+        .pin-wrapper {
+            width: 100%;
+            max-width: 320px;
             text-align: center;
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding-bottom: 50px;
+        }
+
+        .pin-title {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            font-weight: 500;
         }
 
         .pin-dots {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
+            gap: 20px;
+            margin-bottom: 40px;
         }
 
-        .dot {
-            width: 15px;
-            height: 15px;
+        .pin-dot {
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.3);
+            border: 1px solid white;
+            background: transparent;
             transition: 0.2s;
         }
-        .dot.active { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        .pin-dot.filled { background: white; }
 
         .numpad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            gap: 20px 25px; /* Zeile Spalte */
+            justify-items: center;
         }
 
-        .num-btn {
-            background: rgba(255,255,255,0.15);
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            padding: 15px;
+        .key {
+            width: 75px;
+            height: 75px;
             border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.0);
+            font-size: 1.8rem;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
+            transition: background 0.2s;
+            backdrop-filter: blur(5px);
         }
-        .num-btn:active { background: rgba(255,255,255,0.4); }
+        .key:active { background: rgba(255,255,255,0.4); }
 
-        /* --- Main App Style --- */
+        /* --- 2. MAIN APP --- */
         #app-screen {
-            overflow-y: auto; /* WICHTIG: Scrollbar erlauben */
-            padding: 20px;
-            padding-bottom: 50px;
             z-index: 10;
+            overflow-y: auto;
+            padding: 20px;
+            padding-top: 50px; /* Notch Area */
+            align-items: stretch;
         }
 
-        .header {
-            text-align: center;
-            margin-top: 40px;
-            margin-bottom: 20px;
-            animation: fadeIn 1s ease;
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.8);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            object-fit: cover;
         }
 
-        .header h1 {
+        .greeting h1 {
             font-family: 'Nunito', sans-serif;
-            font-size: 2.8rem;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            margin-bottom: 5px;
+            font-size: 2rem;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
-
-        .subtitle {
-            font-size: 1rem;
+        .greeting p {
+            font-size: 0.9rem;
             opacity: 0.9;
-            background: rgba(255,255,255,0.2);
-            padding: 5px 15px;
-            border-radius: 20px;
-            display: inline-block;
         }
 
-        /* Widgets */
+        /* Widgets Styles */
         .widget {
             background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 22px;
             padding: 20px;
             margin-bottom: 20px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            animation: slideUp 0.6s ease;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
         }
 
-        .widget-title {
+        .w-title {
             text-transform: uppercase;
             font-size: 0.75rem;
-            letter-spacing: 1.5px;
-            margin-bottom: 10px;
-            opacity: 0.8;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            padding-bottom: 5px;
+            opacity: 0.7;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
             display: block;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 5px;
         }
 
-        /* Age Grid */
+        /* Detail Grid (Alter) */
         .age-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .age-item {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
             text-align: center;
         }
-        .age-num {
-            font-size: 2rem;
+        .age-val {
+            font-size: 1.5rem;
             font-weight: 700;
             font-family: 'Nunito', sans-serif;
-            text-shadow: 0 0 15px var(--primary);
+            display: block;
+            margin-bottom: 2px;
         }
-        .age-label {
-            font-size: 0.8rem;
-        }
+        .age-lbl { font-size: 0.7rem; opacity: 0.8; }
 
-        /* Full Details */
-        .details-row {
+        /* Stats Rows (Gesamt) */
+        .stat-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
+            padding: 8px 0;
             border-bottom: 1px dashed rgba(255,255,255,0.1);
-            padding-bottom: 8px;
+            font-size: 0.95rem;
         }
-        .details-row:last-child { border: none; }
-        .highlight { font-weight: bold; color: var(--primary-glow); }
+        .stat-row:last-child { border: none; }
+        .highlight { font-weight: 700; color: #ffbfcd; }
 
-        /* Countdown Bar */
-        .progress-container {
-            height: 12px;
+        /* Progress Bars */
+        .event-box { margin-bottom: 15px; }
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+        .progress-track {
+            height: 10px;
             background: rgba(0,0,0,0.3);
-            border-radius: 6px;
+            border-radius: 5px;
             overflow: hidden;
-            margin-top: 10px;
         }
-        .progress-bar {
+        .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-            width: 0%;
-            transition: width 1s ease-in-out;
-            box-shadow: 0 0 10px #ff9a9e;
+            border-radius: 5px;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        /* Animation Keyframes */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .fill-bday { background: linear-gradient(90deg, #f6d365, #fda085); }
+        .fill-name { background: linear-gradient(90deg, #84fab0, #8fd3f4); }
 
     </style>
 </head>
 <body>
 
-    <div class="hearts" id="hearts"></div>
+    <div class="hearts-bg" id="bg-animation"></div>
 
-    <div id="pin-screen">
-        <div class="pin-box">
-            <h2 style="margin-bottom: 15px;">Johanna 🔒</h2>
-            <div class="pin-dots" id="pin-dots">
-                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-            </div>
-            <div class="numpad">
-                <button class="num-btn" onclick="addPin(1)">1</button>
-                <button class="num-btn" onclick="addPin(2)">2</button>
-                <button class="num-btn" onclick="addPin(3)">3</button>
-                <button class="num-btn" onclick="addPin(4)">4</button>
-                <button class="num-btn" onclick="addPin(5)">5</button>
-                <button class="num-btn" onclick="addPin(6)">6</button>
-                <button class="num-btn" onclick="addPin(7)">7</button>
-                <button class="num-btn" onclick="addPin(8)">8</button>
-                <button class="num-btn" onclick="addPin(9)">9</button>
-                <div class="num-btn" style="background:transparent"></div>
-                <button class="num-btn" onclick="addPin(0)">0</button>
-                <button class="num-btn" style="font-size:1rem" onclick="clearPin()">C</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="app-screen" class="hidden">
-        
-        <div class="header">
-            <img src="icon.png" style="width:80px; height:80px; border-radius:20px; border: 2px solid rgba(255,255,255,0.5); box-shadow: 0 5px 20px rgba(0,0,0,0.4);">
-            <h1>Johanna</h1>
-            <div class="subtitle">Willkommen in meiner Welt</div>
-        </div>
-
-        <div class="widget">
-            <span class="widget-title">Ich bin auf der Welt seit...</span>
-            <div class="age-grid">
-                <div class="age-item">
-                    <div class="age-num" id="age-years">0</div>
-                    <div class="age-label">Jahre</div>
-                </div>
-                <div class="age-item">
-                    <div class="age-num" id="age-months">0</div>
-                    <div class="age-label">Monate</div>
-                </div>
-                <div class="age-item">
-                    <div class="age-num" id="age-weeks">0</div>
-                    <div class="age-label">Wochen</div>
-                </div>
-                <div class="age-item">
-                    <div class="age-num" id="age-days">0</div>
-                    <div class="age-label">Tage</div>
-                </div>
-            </div>
-            <div style="text-align: center; margin-top: 15px; font-size: 0.9rem; opacity: 0.8;">
-                Gesamt: <span id="total-days" class="highlight">0</span> Tage
-            </div>
-        </div>
-
-        <div class="widget">
-            <span class="widget-title">Nächste Party 🥳</span>
+    <div id="pin-screen" class="screen">
+        <div class="pin-wrapper">
+            <div style="font-size:3rem; margin-bottom:10px;">🔒</div>
+            <div class="pin-title">Code eingeben</div>
             
-            <div style="margin-bottom: 20px;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <div class="pin-dots">
+                <div class="pin-dot" id="d1"></div>
+                <div class="pin-dot" id="d2"></div>
+                <div class="pin-dot" id="d3"></div>
+                <div class="pin-dot" id="d4"></div>
+            </div>
+
+            <div class="numpad">
+                <div class="key" onclick="tapPin(1)">1</div>
+                <div class="key" onclick="tapPin(2)">2</div>
+                <div class="key" onclick="tapPin(3)">3</div>
+                <div class="key" onclick="tapPin(4)">4</div>
+                <div class="key" onclick="tapPin(5)">5</div>
+                <div class="key" onclick="tapPin(6)">6</div>
+                <div class="key" onclick="tapPin(7)">7</div>
+                <div class="key" onclick="tapPin(8)">8</div>
+                <div class="key" onclick="tapPin(9)">9</div>
+                <div class="key" style="background:transparent; border:none;"></div>
+                <div class="key" onclick="tapPin(0)">0</div>
+                <div class="key" style="background:transparent; border:none; font-size:1rem;" onclick="delPin()">⌫</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-screen" class="screen hidden">
+        
+        <div class="profile-header">
+            <img src="icon.png" class="avatar" alt="J">
+            <div class="greeting">
+                <h1>Johanna</h1>
+                <p>Willkommen zu Hause ❤️</p>
+            </div>
+        </div>
+
+        <div class="widget">
+            <span class="w-title">Alter (Exakt)</span>
+            <div class="age-grid">
+                <div><span class="age-val" id="y">0</span><span class="age-lbl">Jahre</span></div>
+                <div><span class="age-val" id="m">0</span><span class="age-lbl">Monate</span></div>
+                <div><span class="age-val" id="w">0</span><span class="age-lbl">Wochen</span></div>
+                <div><span class="age-val" id="d">0</span><span class="age-lbl">Tage</span></div>
+            </div>
+        </div>
+
+        <div class="widget">
+            <span class="w-title">Statistik (Gesamt)</span>
+            <div class="stat-row">
+                <span>Gesamt Monate</span>
+                <span class="highlight" id="total-m">0</span>
+            </div>
+            <div class="stat-row">
+                <span>Gesamt Wochen</span>
+                <span class="highlight" id="total-w">0</span>
+            </div>
+            <div class="stat-row">
+                <span>Gesamt Tage</span>
+                <span class="highlight" id="total-d">0</span>
+            </div>
+        </div>
+
+        <div class="widget">
+            <span class="w-title">Kommende Events</span>
+            
+            <div class="event-box">
+                <div class="event-header">
                     <span>🎂 Geburtstag (05.11.)</span>
-                    <span id="bday-days" class="highlight">...</span>
+                    <span id="txt-bday">...</span>
                 </div>
-                <div class="progress-container">
-                    <div class="progress-bar" id="bday-bar"></div>
+                <div class="progress-track">
+                    <div class="progress-fill fill-bday" id="bar-bday" style="width:0%"></div>
                 </div>
             </div>
 
-            <div>
-                <div style="display:flex; justify-content:space-between;">
+            <div class="event-box" style="margin-bottom:0;">
+                <div class="event-header">
                     <span>🌸 Namenstag (30.05.)</span>
-                    <span id="nameday-days" class="highlight">...</span>
+                    <span id="txt-name">...</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill fill-name" id="bar-name" style="width:0%"></div>
                 </div>
             </div>
         </div>
 
         <div class="widget">
-            <span class="widget-title">Meine Daten</span>
-            <div class="details-row">
-                <span>📍 Geburtsort</span>
-                <span class="highlight">Innsbruck</span>
+            <span class="w-title">Geburtsdaten</span>
+            <div class="stat-row">
+                <span>📍 Ort</span>
+                <span>Innsbruck</span>
             </div>
-            <div class="details-row">
-                <span>⚖️ Startgewicht</span>
-                <span class="highlight">3060g</span>
+            <div class="stat-row">
+                <span>⏰ Uhrzeit</span>
+                <span>23:25 Uhr</span>
             </div>
-            <div class="details-row">
-                <span>👶 Sternzeichen</span>
-                <span class="highlight">Skorpion</span>
+            <div class="stat-row">
+                <span>⚖️ Gewicht</span>
+                <span>3060g</span>
             </div>
-            <div class="details-row">
-                <span>⏰ Geburtszeit</span>
-                <span class="highlight">Unbekannt</span> </div>
         </div>
-
-    </div>
+        
+        <div style="height:50px"></div> </div>
 
     <script>
-        // --- CONFIG ---
+        // --- KONFIGURATION ---
         const CONFIG = {
             pin: "0511",
-            dob: new Date("2025-11-05T00:00:00"),
-            nameday: { day: 30, month: 5 } // 30. Mai
+            dob: new Date("2025-11-05T23:25:00"), 
+            nameday: { d: 30, m: 5 } // 30. Mai
         };
 
-        // --- PIN LOGIC (Smartphone Style) ---
-        let currentPin = "";
-        const dots = document.querySelectorAll('.dot');
-
-        function addPin(num) {
-            if (currentPin.length < 4) {
-                currentPin += num;
-                updateDots();
-                if (currentPin.length === 4) {
-                    setTimeout(checkPin, 300);
+        // --- PIN SYSTEM ---
+        let pinBuffer = "";
+        
+        function tapPin(n) {
+            if(pinBuffer.length < 4) {
+                pinBuffer += n;
+                updatePinUI();
+                if(pinBuffer.length === 4) {
+                    setTimeout(checkPin, 200);
                 }
             }
         }
 
-        function clearPin() {
-            currentPin = "";
-            updateDots();
+        function delPin() {
+            pinBuffer = pinBuffer.slice(0, -1);
+            updatePinUI();
         }
 
-        function updateDots() {
-            dots.forEach((dot, index) => {
-                if (index < currentPin.length) dot.classList.add('active');
-                else dot.classList.remove('active');
-            });
+        function updatePinUI() {
+            for(let i=1; i<=4; i++) {
+                const el = document.getElementById('d'+i);
+                if(i <= pinBuffer.length) el.classList.add('filled');
+                else el.classList.remove('filled');
+            }
         }
 
         function checkPin() {
-            if (currentPin === CONFIG.pin) {
+            if(pinBuffer === CONFIG.pin) {
+                // Success
                 document.getElementById('pin-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
-                startApp();
+                initApp();
             } else {
-                // Shake Animation bei Fehler
-                const box = document.querySelector('.pin-box');
-                box.style.transform = "translateX(10px)";
-                setTimeout(() => box.style.transform = "translateX(-10px)", 100);
-                setTimeout(() => box.style.transform = "translateX(0)", 200);
-                clearPin();
+                // Fail Animation
+                const wrap = document.querySelector('.pin-wrapper');
+                wrap.style.transform = "translateX(20px)";
+                setTimeout(() => wrap.style.transform = "translateX(-20px)", 100);
+                setTimeout(() => wrap.style.transform = "translateX(0)", 200);
+                pinBuffer = "";
+                updatePinUI();
             }
         }
 
         // --- APP LOGIC ---
-        function startApp() {
-            updateAll();
-            setInterval(updateAll, 1000);
+        function initApp() {
             createHearts();
+            updateLoop();
+            setInterval(updateLoop, 1000);
         }
 
-        function updateAll() {
+        function updateLoop() {
             const now = new Date();
             const birth = CONFIG.dob;
 
-            // 1. Alter berechnen (Jahre, Monate, Tage exakt)
+            // -- 1. Exaktes Alter (Jahre/Monate/Tage/Stunden Logik für Rest) --
             let years = now.getFullYear() - birth.getFullYear();
             let months = now.getMonth() - birth.getMonth();
             let days = now.getDate() - birth.getDate();
 
             if (days < 0) {
                 months--;
-                // Tage im Vormonat ermitteln
+                // Tage des Vormonats addieren
                 days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
             }
             if (months < 0) {
@@ -418,76 +449,108 @@
                 months += 12;
             }
 
-            // Wochen und Resttage für die Anzeige
-            // Einfache Annäherung für "Wochen"-Anzeige im Grid:
-            // Wir nehmen die Tage des laufenden Monatsrestes für die Wochenanzeige oder
-            // berechnen totale Wochen seit Geburt?
-            // User wollte: "Tage, Woche, Monate, Jahre".
-            // Interpretation: Das Grid zeigt die Komponenten des Alters.
-            // Die "Wochen" sind hier etwas tricky in Kombination mit Monaten. 
-            // Lösung: Wir zeigen Jahre, Monate, und den Rest in Wochen + Tagen.
-            
-            let weeks = Math.floor(days / 7);
+            // Für die Wochenanzeige im oberen Widget: "Resttage / 7"
+            // Da oben "Wochen" und "Tage" separat stehen, rechnen wir
+            // die 'days' (Resttage des Monats) in Wochen und Tage um.
+            let restWeeks = Math.floor(days / 7);
             let restDays = days % 7;
 
-            // UI Update Alter
-            document.getElementById('age-years').innerText = years;
-            document.getElementById('age-months').innerText = months;
-            document.getElementById('age-weeks').innerText = weeks;
-            document.getElementById('age-days').innerText = restDays;
-
-            // Gesamttage
-            const diffTime = Math.abs(now - birth);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-            document.getElementById('total-days').innerText = diffDays.toLocaleString();
+            document.getElementById('y').innerText = years;
+            document.getElementById('m').innerText = months;
+            document.getElementById('w').innerText = restWeeks;
+            document.getElementById('d').innerText = restDays;
 
 
-            // 2. Nächster Geburtstag Countdown
-            let nextBday = new Date(birth);
-            nextBday.setFullYear(now.getFullYear());
-            if (now > nextBday) nextBday.setFullYear(now.getFullYear() + 1);
+            // -- 2. Statistik (Gesamt) --
+            // Gesamt-Tage
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const diffTime = now - birth;
+            const totalDays = Math.floor(diffTime / msPerDay);
             
-            const diffBday = nextBday - now;
-            const daysToBday = Math.floor(diffBday / (1000 * 60 * 60 * 24));
-            
-            document.getElementById('bday-days').innerText = daysToBday === 0 ? "HEUTE! 🎉" : daysToBday + " Tage";
-            
-            // Progress Bar (1 Jahr = 100%)
-            const percent = 100 - ((daysToBday / 365) * 100);
-            document.getElementById('bday-bar').style.width = percent + "%";
+            // Gesamt-Wochen
+            const totalWeeks = Math.floor(totalDays / 7);
+
+            // Gesamt-Monate (Exakt nach Kalender)
+            let totalMonths = (years * 12) + months;
+
+            document.getElementById('total-m').innerText = totalMonths.toLocaleString();
+            document.getElementById('total-w').innerText = totalWeeks.toLocaleString();
+            document.getElementById('total-d').innerText = totalDays.toLocaleString();
 
 
-            // 3. Namenstag Countdown (30.05.)
-            let nextNameDay = new Date(now.getFullYear(), CONFIG.nameday.month - 1, CONFIG.nameday.day);
-            // Wenn dieses Jahr schon vorbei, dann nächstes Jahr
-            if (now > nextNameDay && now.getDate() !== nextNameDay.getDate()) {
-                nextNameDay.setFullYear(now.getFullYear() + 1);
+            // -- 3. Fortschrittsbalken Geburtstag --
+            updateProgress(
+                now, 
+                birth.getDate(), 
+                birth.getMonth(), 
+                'txt-bday', 
+                'bar-bday'
+            );
+
+            // -- 4. Fortschrittsbalken Namenstag --
+            updateProgress(
+                now, 
+                CONFIG.nameday.d, 
+                CONFIG.nameday.m - 1, // JS Monate sind 0-basiert
+                'txt-name', 
+                'bar-name'
+            );
+        }
+
+        function updateProgress(now, targetDay, targetMonth, textId, barId) {
+            // Nächstes Zieldatum finden
+            let target = new Date(now.getFullYear(), targetMonth, targetDay);
+            let lastTarget = new Date(now.getFullYear() - 1, targetMonth, targetDay);
+            
+            // Wenn das Datum dieses Jahr schon vorbei ist, ist das Ziel nächstes Jahr
+            // Das "letzte" Ereignis war dann dieses Jahr
+            if (now > target && now.getDate() !== target.getDate()) {
+                target.setFullYear(now.getFullYear() + 1);
+                lastTarget.setFullYear(now.getFullYear());
             }
 
-            const diffName = nextNameDay - now;
-            let daysToName = Math.ceil(diffName / (1000 * 60 * 60 * 24));
+            // Differenz berechnen
+            const totalSpan = target - lastTarget;
+            const elapsed = now - lastTarget;
+            let percent = (elapsed / totalSpan) * 100;
 
-            // Fix für "Heute" (Manchmal ergibt math ceil -0 oder 0 je nach uhrzeit)
-            if (now.getDate() == CONFIG.nameday.day && now.getMonth() == (CONFIG.nameday.month -1)) {
-                 daysToName = 0;
+            // Resttage berechnen
+            const diffMs = target - now;
+            const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+            
+            // Text Logik
+            let txt = daysLeft + " Tage";
+            if (daysLeft === 0 || (now.getDate() === targetDay && now.getMonth() === targetMonth)) {
+                txt = "HEUTE! 🎉";
+                percent = 100;
+            } else if (daysLeft > 360) {
+                // Kurz nach dem Event
+                percent = 1; 
             }
 
-            document.getElementById('nameday-days').innerText = daysToName === 0 ? "Heute! 🌸" : daysToName + " Tage";
+            document.getElementById(textId).innerText = txt;
+            document.getElementById(barId).style.width = percent + "%";
         }
 
         // --- BACKGROUND HEARTS ---
         function createHearts() {
-            const container = document.getElementById('hearts');
-            setInterval(() => {
-                const el = document.createElement('div');
-                el.classList.add('heart-particle');
-                el.innerHTML = Math.random() > 0.5 ? '❤️' : '🤍';
-                el.style.left = Math.random() * 100 + "vw";
-                el.style.fontSize = (Math.random() * 20 + 10) + "px";
-                el.style.animationDuration = (Math.random() * 3 + 4) + "s";
-                container.appendChild(el);
-                setTimeout(() => el.remove(), 7000);
-            }, 500);
+            const container = document.getElementById('bg-animation');
+            // Initiale Herzen
+            for(let i=0; i<15; i++) spawnHeart(container);
+            // Nachschub
+            setInterval(() => spawnHeart(container), 2000);
+        }
+
+        function spawnHeart(container) {
+            const h = document.createElement('div');
+            h.classList.add('heart');
+            h.innerText = Math.random() > 0.5 ? '❤️' : '🤍';
+            h.style.left = Math.random() * 100 + "vw";
+            h.style.animationDuration = (Math.random() * 5 + 5) + "s"; // 5-10s
+            h.style.fontSize = (Math.random() * 20 + 10) + "px";
+            container.appendChild(h);
+            
+            setTimeout(() => h.remove(), 10000);
         }
 
     </script>
